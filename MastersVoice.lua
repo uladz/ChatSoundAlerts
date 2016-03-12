@@ -13,11 +13,13 @@ MastersVoice.version = 0.43
 lastCall = 0								-- time of last alarm sound
 local savedVariables = {}
 local Default = {
-	silentTime = 30,						-- number of seconds to wait before sounding again
-	combatOnly = true,						-- whether to sound only when player is in combat
-	groupOnly = true,						-- whether to sound only if crown speaks through /g or /y
-	allianceWarOnly = true,					-- whether to sound only if in an alliance war zone
-	alarmSound = "ABILITY_MORPH_PURCHASED"	-- number of the alarm sound in MastersVoice.AlarmSoundsList table
+  silentTime = 30,						-- number of seconds to wait before sounding again
+  combatOnly = true,						-- whether to sound only when player is in combat
+  groupOnly = true,						-- whether to sound only if anyone speaks through /g or /y
+  crownOnly = true,						-- whether to sound only if crown speaks through /g or /y
+  allianceWarOnly = true,					-- whether to sound only if in an alliance war zone
+  alarmSound1 = "ABILITY_MORPH_PURCHASED",	-- number of the alarm sound in MastersVoice.AlarmSoundsList table
+  alarmSound2 = "ABILITY_MORPH_PURCHASED"	-- number of the alarm sound in MastersVoice.AlarmSoundsList table
 }
 local alarmSoundsList = {
 	"ABILITY_MORPH_PURCHASED",
@@ -45,12 +47,20 @@ function MastersVoice.SetGroupOnly(newBool)
 	savedVariables.groupOnly = newBool
 end
 
+function MastersVoice.SetCrownOnly(newBool)
+	savedVariables.crownOnly = newBool
+end
+
 function MastersVoice.SetAllianceWarOnly(newBool)
 	savedVariables.allianceWarOnly = newBool
 end
 
-function MastersVoice.SetAlarmSound(newSoundName)
-	savedVariables.alarmSound = newSoundName
+function MastersVoice.SetAlarmSound1(newSoundName)
+	savedVariables.alarmSound1 = newSoundName
+end
+
+function MastersVoice.SetAlarmSound2(newSoundName)
+	savedVariables.alarmSound2 = newSoundName
 end
 
 ------------------------------------------
@@ -92,7 +102,7 @@ local optionsData = {
 	[3] = {
 		type = "checkbox",
 		name = "Group Chat or Yell Only",
-		tooltip = "Notify only when crown speaks through group chat or yells.",
+		tooltip = "Notify only when anyone speaks through group chat or yells.",
 		getFunc = function() return savedVariables.groupOnly end,
 		setFunc = function(newBool) MastersVoice.SetGroupOnly(newBool) end,
 		width = "full",	--or "half" (optional)
@@ -102,6 +112,18 @@ local optionsData = {
 		reference = "MastersVoice_SETGROUPONLY_CHECKBOX"	--(optional) unique global reference to control
 	},
 	[4] = {
+		type = "checkbox",
+		name = "Crown (leader) Only",
+		tooltip = "Notify only when crown speaks through group chat or yells.",
+		getFunc = function() return savedVariables.crownOnly end,
+		setFunc = function(newBool) MastersVoice.SetCrownOnly(newBool) end,
+		width = "full",	--or "half" (optional)
+		-- disaled = function() return db.someBooleanSetting end,	--or boolean (optional)
+		-- warnng = "Will need to reload the UI.",	--(optional)
+		default = Default.groupOnly,	--(optional)
+		reference = "MastersVoice_SETCROWNONLY_CHECKBOX"	--(optional) unique global reference to control
+	},
+	[5] = {
 		type = "checkbox",
 		name = "Alliance War Only",
 		tooltip = "Notify only when player is in an Alliance War zone (e.g., Cyrodiil)",
@@ -113,7 +135,7 @@ local optionsData = {
 		default = Default.allianceWarOnly,	--(optional)
 		reference = "MastersVoice_SETALLIANCEWARONLY_CHECKBOX"	--(optional) unique global reference to control
 	},
-	[5] = {
+	[6] = {
 		type = "slider",
 		name = "Frequency",
 		tooltip = "Number of seconds to wait between crown notifications.",
@@ -128,30 +150,55 @@ local optionsData = {
 		default = Default.silentTime,	--(optional)
 		reference = "MastersVoice_SILENTTIME_SLIDER"	--(optional) unique global reference to control
 	},
-	[6] = {
+	[7] = {
 		type = "dropdown",
-		name = "Notification Sound",
-		tooltip = "Choose which sound to play for crown notifications.",
+		name = "Group Notification Sound",
+		tooltip = "Choose which sound to play for group notifications.",
 		choices = alarmSoundsList,
 		sort = "name-up", --or "name-down", "numeric-up", "numeric-down" (optional) - if not provided, list will not be sorted
-		getFunc = function() return savedVariables.alarmSound end,
-		setFunc = function(newSoundName) MastersVoice.SetAlarmSound(newSoundName) end,
+		getFunc = function() return savedVariables.alarmSound1 end,
+		setFunc = function(newSoundName) MastersVoice.SetAlarmSound1(newSoundName) end,
 		width = "full",	--or "half" (optional)
 		--disabled = function() return db.someBooleanSetting end,	--or boolean (optional)
 		--warning = "Will need to reload the UI.",	--(optional)
-		default = Default.alarmSound,	--(optional)
-		reference = "MastersVoice_ALARMSOUND_DROPDOWN"	--(optional) unique global reference to control
+		default = Default.alarmSound1,	--(optional)
+		reference = "MastersVoice_ALARMSOUND1_DROPDOWN"	--(optional) unique global reference to control
 	},
-	[7] = {
+	[8] = {
 		type = "button",
-		name = "Preview",
+		name = "Preview Group",
 		tooltip = "Preview notification sound.",
-		func = function() MastersVoice.PlayAlarm() end,
+		func = function() MastersVoice.PlayAlarm1() end,
 		width = "full",	--or "half" (optional)
 		--disabled = function() return db.someBooleanSetting end,	--or boolean (optional)
 		--icon = "icon\\path.dds",	--(optional)
 		--warning = "Will need to reload the UI.",	--(optional)
-		reference = "MastersVoice_PREVIEW_BUTTON"	--(optional) unique global reference to control
+		reference = "MastersVoice_PREVIEW1_BUTTON"	--(optional) unique global reference to control
+	},
+	[9] = {
+		type = "dropdown",
+		name = "Crown Notification Sound",
+		tooltip = "Choose which sound to play for crown notifications.",
+		choices = alarmSoundsList,
+		sort = "name-up", --or "name-down", "numeric-up", "numeric-down" (optional) - if not provided, list will not be sorted
+		getFunc = function() return savedVariables.alarmSound2 end,
+		setFunc = function(newSoundName) MastersVoice.SetAlarmSound2(newSoundName) end,
+		width = "full",	--or "half" (optional)
+		--disabled = function() return db.someBooleanSetting end,	--or boolean (optional)
+		--warning = "Will need to reload the UI.",	--(optional)
+		default = Default.alarmSound2,	--(optional)
+		reference = "MastersVoice_ALARMSOUND2_DROPDOWN"	--(optional) unique global reference to control
+	},
+	[10] = {
+		type = "button",
+		name = "Preview Crown",
+		tooltip = "Preview notification sound.",
+		func = function() MastersVoice.PlayAlarm2() end,
+		width = "full",	--or "half" (optional)
+		--disabled = function() return db.someBooleanSetting end,	--or boolean (optional)
+		--icon = "icon\\path.dds",	--(optional)
+		--warning = "Will need to reload the UI.",	--(optional)
+		reference = "MastersVoice_PREVIEW2_BUTTON"	--(optional) unique global reference to control
 	}
 }
 
@@ -183,24 +230,49 @@ end
 ------------------------------------------
 
 function MastersVoice.OnChatMessageChannel(eventCode, messageType, fromName, messageText, isCustomerService)
-	if savedVariables.allianceWarOnly then
-		if not IsPlayerInAvAWorld() then return end
-	end
-	if savedVariables.groupOnly then
-		if messageType ~= 3 then return end
-	end
-	if fromName ~= GetRawUnitName(GetGroupLeaderUnitTag()) then return end
-	if savedVariables.combatOnly then
-		if not IsUnitInCombat("player") then return end
-	end
-	if GetDiffBetweenTimeStamps(GetTimeStamp(), lastCall) < savedVariables.silentTime then return end
-	lastCall = GetTimeStamp()
-	MastersVoice.PlayAlarm()
+  local crownSpeaks = false
+  if fromName ~= GetRawUnitName(GetGroupLeaderUnitTag()) then
+    crownSpeaks = true
+  end
+  if savedVariables.allianceWarOnly then
+    if not IsPlayerInAvAWorld() then
+      return
+    end
+  end
+  if savedVariables.groupOnly then
+    if messageType ~= 3 then
+      return
+    end
+  end
+  if savedVariables.crownOnly then
+    if not crownSpeaks then
+      return
+    end
+  end
+  if savedVariables.combatOnly then
+    if not IsUnitInCombat("player") then
+      return
+    end
+  end
+  if GetDiffBetweenTimeStamps(GetTimeStamp(), lastCall) < savedVariables.silentTime then
+    return
+  end
+  lastCall = GetTimeStamp()
+  if not crownSpeaks then
+    MastersVoice.PlayAlarm1()
+  else
+    MastersVoice.PlayAlarm2()
+  end
 end
 
-function MastersVoice.PlayAlarm()
+function MastersVoice.PlayAlarm1()
 	--temp = "SOUNDS." .. savedVariables.alarmSound
-	PlaySound(savedVariables.alarmSound)
+	PlaySound(savedVariables.alarmSound1)
+end
+
+function MastersVoice.PlayAlarm2()
+	--temp = "SOUNDS." .. savedVariables.alarmSound
+	PlaySound(savedVariables.alarmSound2)
 end
 
 EVENT_MANAGER:RegisterForEvent(MastersVoice.name, EVENT_ADD_ON_LOADED, MastersVoice.OnAddOnLoaded)
