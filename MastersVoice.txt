@@ -1,10 +1,10 @@
-## Title: Master's Voice
-## APIVersion: 100011
-## Description: The Master's Voice Version 0.42.
-## Version: 0.43
+## Title: |rMaster's Voice |c9988770.5|r
+## APIVersion: 100014
+## Description: Plays a sound whenever the group leader or any other group member (optional) says something in chat so you don't miss important messages in the heat of battle.
+## Version: 0.5
 ## SavedVariables: MastersVoiceVars
 ## OptionalDependsOn: LibAddonMenu-2.0
-## Author: HomoPuerRobustus
+## Author: Uladz, HomoPuerRobustus
 
 MastersVoice.lua
 MastersVoice.xml
