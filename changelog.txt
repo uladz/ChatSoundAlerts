@@ -1,0 +1,8 @@
+Major relase 0.5:
+  * In progress...
+
+Bugfix release 0.43 (by HomoPuerRobustus):
+  * Fixed bug where custom frequency setting would produce error message and eliminate functionality.
+
+Major release 0.42 (by HomoPuerRobustus):
+  * Initial release

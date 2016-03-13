@@ -1,13 +1,12 @@
 ## Title: |rMaster's Voice |c9988770.5|r
-## APIVersion: 100014
-## Description: Plays a sound whenever the group leader or any other group member (optional) says something in chat so you don't miss important messages in the heat of battle.
 ## Version: 0.5
+## Author: Uladz, HomoPuerRobustus
+## Description: Plays a sound whenever the group leader or any other group member (optional) says something in chat so you don't miss important messages in the heat of battle.
+## APIVersion: 100014
 ## SavedVariables: MastersVoiceVars
 ## OptionalDependsOn: LibAddonMenu-2.0
-## Author: Uladz, HomoPuerRobustus
 
-MastersVoice.lua
-MastersVoice.xml
+# Libraries
 Libs\LibStub\LibStub.lua
 Libs\LibAddonMenu-2.0\LibAddonMenu-2.0.lua
 Libs\LibAddonMenu-2.0\controls\panel.lua
@@ -22,3 +21,6 @@ Libs\LibAddonMenu-2.0\controls\editbox.lua
 Libs\LibAddonMenu-2.0\controls\header.lua
 Libs\LibAddonMenu-2.0\controls\slider.lua
 Libs\LibAddonMenu-2.0\controls\texture.lua
+
+# Main file
+MastersVoice.lua
