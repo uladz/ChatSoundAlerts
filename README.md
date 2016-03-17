@@ -1,2 +1,2 @@
-# TheMastersVoice
-Elder Scrolls Online Addon.
+# The Master's Voice
+The Master's Voice plays a sound whenever the group leader says something in chat (so you don't miss important messages in the heat of battle). By default, the sound plays only when the player is in combat in Cyrodiil and only if the group leader says something in group chat or yells it. Users can also customize how often they receive a notice (by default, no more than once every thirty seconds) and the notification sound to be played.
