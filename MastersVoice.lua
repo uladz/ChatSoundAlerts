@@ -12,12 +12,12 @@ local MastersVoice = {
   -- configuration version, changing this will reset all addon settings
   configVersion = 0.5,
 
-  -- enable for debug log output
-  debug = false
-}
+  -- Time of last alarm sound.
+  lastCall = 0,
 
--- Time of last alarm sound.
-local lastCall = 0
+  -- enable for debug log output
+  debug = false,
+}
 
 -- Saved configuration variables.
 local config = {}
@@ -30,6 +30,8 @@ local Default = {
   silentTime = 0,
   -- whether to ignore [silentTime] for crown
   crownAlways = true,
+  -- whether to sound if anyone speaks through /w
+  whisperAlways = true,
   -- whether to sound only when player is in combat
   combatOnly = false,
   -- whether to sound if player himself speaks
@@ -52,6 +54,8 @@ local Default = {
   yellAlarmSound = "NEW_NOTIFICATION",
   -- crown message alarm sound in [AlarmSoundsList] table
   crownAlarmSound = "NEW_NOTIFICATION",
+  -- whisper message alarm sound in [AlarmSoundsList] table
+  whisperAlarmSound = "NEW_NOTIFICATION",
   -- all other messages alarm sound in [AlarmSoundsList] table
   otherAlarmSound = "NEW_NOTIFICATION",
 }
@@ -95,6 +99,14 @@ end
 
 function MastersVoice.SetSilentTime(newTime)
   config.silentTime = newTime
+end
+
+function MastersVoice.SetCrownAlways(newBool)
+  config.crownAlways = newBool
+end
+
+function MastersVoice.SetWhisperAlways(newBool)
+  config.whisperAlways = newBool
 end
 
 function MastersVoice.SetCombatOnly(newBool)
@@ -149,6 +161,13 @@ function MastersVoice.SetYellAlarmSound(newSoundName, play)
   end
 end
 
+function MastersVoice.SetWhisperAlarmSound(newSoundName, play)
+  config.whisperAlarmSound = newSoundName
+  if play == true then
+    MastersVoice.PlayWhisperAlarm()
+  end
+end
+
 function MastersVoice.SetOtherAlarmSound(newSoundName, play)
   config.otherAlarmSound = newSoundName
   if play == true then
@@ -173,6 +192,10 @@ end
 
 function MastersVoice.PlayYellAlarm()
   PlaySound(config.yellAlarmSound)
+end
+
+function MastersVoice.PlayWhisperAlarm()
+  PlaySound(config.whisperAlarmSound)
 end
 
 function MastersVoice.PlayOtherAlarm()
@@ -209,34 +232,12 @@ local optionsData = {
     reference = "MastersVoice_SETMUTEALL_CHECKBOX"
   },
   [2] = {
-    type = "description",
-    text = "Set criteria for notifications.",
+    type = "header",
+    name = "Notification Conditions",
     width = "full",
-    reference = "MastersVoice_DESCRIPTION1"
+    reference = "MastersVoice_HEADER_1"
   },
   [3] = {
-    type = "checkbox",
-    name = "Combat Only",
-    tooltip = "Notify only when player is in combat.",
-    getFunc = function() return config.combatOnly end,
-    setFunc = function(newBool) MastersVoice.SetCombatOnly(newBool) end,
-    width = "full",
-    default = Default.combatOnly,
-    disabled = function() return config.muteAll end,
-    reference = "MastersVoice_SETCOMBATONLY_CHECKBOX"
-  },
-  [4] = {
-    type = "checkbox",
-    name = "Player Also",
-    tooltip = "Notify also when player speaks through group chat.",
-    getFunc = function() return config.playerAlso end,
-    setFunc = function(newBool) MastersVoice.SetPlayerAlso(newBool) end,
-    width = "full",
-    default = Default.playerOnly,
-    disabled = function() return config.muteAll end,
-    reference = "MastersVoice_SETPLAYERALSO_CHECKBOX"
-  },
-  [5] = {
     type = "checkbox",
     name = "Group Channel",
     tooltip = "Notify only when anyone speaks through group chat.",
@@ -247,7 +248,7 @@ local optionsData = {
     disabled = function() return config.muteAll end,
     reference = "MastersVoice_SETGROUPONLY_CHECKBOX"
   },
-  [6] = {
+  [4] = {
     type = "checkbox",
     name = "Yell Channel",
     tooltip = "Notify only when anyone speaks through yells.",
@@ -258,7 +259,7 @@ local optionsData = {
     disabled = function() return config.muteAll end,
     reference = "MastersVoice_SETYELLONLY_CHECKBOX"
   },
-  [7] = {
+  [5] = {
     type = "checkbox",
     name = "Guild Channel",
     tooltip = "Notify only when anyone speaks through guild chat.",
@@ -269,7 +270,7 @@ local optionsData = {
     disabled = function() return config.muteAll end,
     reference = "MastersVoice_SETGUILDONLY_CHECKBOX"
   },
-  [8] = {
+  [6] = {
     type = "checkbox",
     name = "Crown (leader) Only",
     tooltip = "Notify only when crown speaks through group chat or yells.",
@@ -280,7 +281,18 @@ local optionsData = {
     disabled = function() return config.muteAll end,
     reference = "MastersVoice_SETCROWNONLY_CHECKBOX"
   },
-  [9] = {
+  [7] = {
+    type = "checkbox",
+    name = "Combat Only",
+    tooltip = "Notify only when player is in combat.",
+    getFunc = function() return config.combatOnly end,
+    setFunc = function(newBool) MastersVoice.SetCombatOnly(newBool) end,
+    width = "full",
+    default = Default.combatOnly,
+    disabled = function() return config.muteAll end,
+    reference = "MastersVoice_SETCOMBATONLY_CHECKBOX"
+  },
+  [8] = {
     type = "checkbox",
     name = "Alliance War Only",
     tooltip = "Notify only when player is in an Alliance War zone (e.g., Cyrodiil)",
@@ -291,9 +303,9 @@ local optionsData = {
     disabled = function() return config.muteAll end,
     reference = "MastersVoice_SETALLIANCEWARONLY_CHECKBOX"
   },
-  [10] = {
+  [9] = {
     type = "checkbox",
-    name = "Enforce Crown Always",
+    name = "Force Crown (leader) Always",
     tooltip = "Always play notification for crown messages regardless of frequency or channel settings.",
     getFunc = function() return config.crownAlways end,
     setFunc = function(newBool) MastersVoice.SetCrownAlways(newBool) end,
@@ -302,7 +314,29 @@ local optionsData = {
     disabled = function() return config.muteAll end,
     reference = "MastersVoice_SETCROWNALWAYS_CHECKBOX"
   },
+  [10] = {
+    type = "checkbox",
+    name = "Whisper Alarm",
+    tooltip = "Play notification whenever someone sends me a whisper.",
+    getFunc = function() return config.whisperAlways end,
+    setFunc = function(newBool) MastersVoice.SetWhisperAlways(newBool) end,
+    width = "full",
+    default = Default.whisperAlways,
+    disabled = function() return config.muteAll end,
+    reference = "MastersVoice_SETWHISPERALWAYS_CHECKBOX"
+  },
   [11] = {
+    type = "checkbox",
+    name = "Player Also",
+    tooltip = "Notify also when player speaks through group chat.",
+    getFunc = function() return config.playerAlso end,
+    setFunc = function(newBool) MastersVoice.SetPlayerAlso(newBool) end,
+    width = "full",
+    default = Default.playerOnly,
+    disabled = function() return config.muteAll end,
+    reference = "MastersVoice_SETPLAYERALSO_CHECKBOX"
+  },
+  [12] = {
     type = "slider",
     name = "Frequency",
     tooltip = "Number of seconds to wait between notifications.",
@@ -316,13 +350,13 @@ local optionsData = {
     disabled = function() return config.muteAll end,
     reference = "MastersVoice_SILENTTIME_SLIDER"
   },
-  [12] = {
-    type = "description",
-    text = "Choose notifications sound.",
-    width = "full",
-    reference = "MastersVoice_DESCRIPTION2"
-  },
   [13] = {
+    type = "header",
+    name = "Notification Sounds",
+    width = "full",
+    reference = "MastersVoice_HEADER_2"
+  },
+  [14] = {
     type = "dropdown",
     name = "Group Notification Sound",
     tooltip = "Choose which sound to play for group notifications.",
@@ -335,7 +369,7 @@ local optionsData = {
     disabled = function() return config.muteAll end,
     reference = "MastersVoice_GROUPALARMSOUND_DROPDOWN"
   },
-  [14] = {
+  [15] = {
     type = "button",
     name = "Preview Group",
     tooltip = "Preview notification sound.",
@@ -344,7 +378,7 @@ local optionsData = {
     disabled = function() return config.muteAll end,
     reference = "MastersVoice_GROUPPREVIEW_BUTTON"
   },
-  [15] = {
+  [16] = {
     type = "dropdown",
     name = "Crown Notification Sound",
     tooltip = "Choose which sound to play for crown notifications.",
@@ -357,7 +391,7 @@ local optionsData = {
     disabled = function() return config.muteAll end,
     reference = "MastersVoice_CROWNALARMSOUND_DROPDOWN"
   },
-  [16] = {
+  [17] = {
     type = "button",
     name = "Preview Crown",
     tooltip = "Preview notification sound.",
@@ -366,7 +400,7 @@ local optionsData = {
     disabled = function() return config.muteAll end,
     reference = "MastersVoice_CROWNPREVIEW_BUTTON"
   },
-  [17] = {
+  [18] = {
     type = "dropdown",
     name = "Guild Notification Sound",
     tooltip = "Choose which sound to play for guild notifications.",
@@ -379,7 +413,7 @@ local optionsData = {
     disabled = function() return config.muteAll end,
     reference = "MastersVoice_GUILDNALARMSOUND_DROPDOWN"
   },
-  [18] = {
+  [19] = {
     type = "button",
     name = "Preview Guild",
     tooltip = "Preview notification sound.",
@@ -388,7 +422,7 @@ local optionsData = {
     disabled = function() return config.muteAll end,
     reference = "MastersVoice_GUILDPREVIEW_BUTTON"
   },
-  [19] = {
+  [20] = {
     type = "dropdown",
     name = "Yell Notification Sound",
     tooltip = "Choose which sound to play for yell notifications.",
@@ -401,7 +435,7 @@ local optionsData = {
     disabled = function() return config.muteAll end,
     reference = "MastersVoice_YELLNALARMSOUND_DROPDOWN"
   },
-  [20] = {
+  [21] = {
     type = "button",
     name = "Preview Yell",
     tooltip = "Preview notification sound.",
@@ -410,7 +444,29 @@ local optionsData = {
     disabled = function() return config.muteAll end,
     reference = "MastersVoice_YELLPREVIEW_BUTTON"
   },
-  [21] = {
+  [22] = {
+    type = "dropdown",
+    name = "Whisper Notifications Sound",
+    tooltip = "Choose which sound to play for whisper notifications.",
+    choices = AlarmSoundsList,
+    sort = "name-up",
+    getFunc = function() return config.whisperAlarmSound end,
+    setFunc = function(newSoundName) MastersVoice.SetWhisperAlarmSound(newSoundName, true) end,
+    width = "half",
+    default = Default.whisperAlarmSound,
+    disabled = function() return config.muteAll end,
+    reference = "MastersVoice_WHISPERNALARMSOUND_DROPDOWN"
+  },
+  [23] = {
+    type = "button",
+    name = "Preview Other",
+    tooltip = "Preview notification sound.",
+    func = function() MastersVoice.PlayWhisperAlarm() end,
+    width = "half",
+    disabled = function() return config.muteAll end,
+    reference = "MastersVoice_WHISPERPREVIEW_BUTTON"
+  },
+  [24] = {
     type = "dropdown",
     name = "Other Notifications Sound",
     tooltip = "Choose which sound to play for all other notifications.",
@@ -423,7 +479,7 @@ local optionsData = {
     disabled = function() return config.muteAll end,
     reference = "MastersVoice_OTHERNALARMSOUND_DROPDOWN"
   },
-  [22] = {
+  [25] = {
     type = "button",
     name = "Preview Other",
     tooltip = "Preview notification sound.",
@@ -489,53 +545,25 @@ function MastersVoice.OnChatMessageChannel(
     return
   end
   if not config.playerAlso then
-    if fromName == GetRawUnitName("player") then
+    if fromName == GetRawUnitName("player") 
+        or messageType == CHAT_CHANNEL_WHISPER_SENT then
       -- don't play notification for yourself
       d("?:player, skip")
       return
     end
   end
-  if config.allianceWarOnly then
-    if not IsPlayerInAvAWorld() then
-      -- skip if not in alliance war zone
-      d("cond:!war, skip")
-      return
-    end
-  end
-  local alertChannel = ""
-  if config.groupOnly or config.allChannels then
-    if messageType == CHAT_CHANNEL_PARTY then
-      -- notify if group channel used
-      d("?:party")
-      alertChannel = "GROUP"
-    end
-  end
-  if config.guildOnly or config.allChannels then
-    if messageType == CHAT_CHANNEL_GUILD1
-        or messageType == CHAT_CHANNEL_GUILD2
-        or messageType == CHAT_CHANNEL_GUILD3
-        or messageType == CHAT_CHANNEL_GUILD4
-        or messageType == CHAT_CHANNEL_GUILD5 then
-      -- notify if group channel used
-      d("?:guild")
-      alertChannel = "GUILD"
-    end
-  end
-  if config.yellOnly or config.allChannels then
-    if messageType == CHAT_CHANNEL_YELL then
-      -- notify if yell channel used
-      d("?:yell")
-      alertChannel = "YELL"
-    end
-  end
-  if alertChannel == "" and config.allChannels then
-    -- all other channels end up here
-    alertChannel = "OTHER"
+  if config.whisperAlways and
+      messageType == CHAT_CHANNEL_WHISPER then
+    -- force notify if whisper channel used
+    d("?:whisper")
+    MastersVoice.PlayWhisperAlarm()
+    return
   end
   local crownSpeaks = false
   if fromName == GetRawUnitName(GetGroupLeaderUnitTag()) then
     crownSpeaks = true
     if config.crownAlways then
+      force = true
       -- if crown sound enforced then play right away
       MastersVoice.PlayCrownAlarm()
       return
@@ -548,12 +576,52 @@ function MastersVoice.OnChatMessageChannel(
       return
     end
   end
-  if config.combatOnly then
+  if config.allianceWarOnly then
+    if not IsPlayerInAvAWorld() then
+      -- skip if not in alliance war zone
+      d("cond:!war, skip")
+      return
+    end
+  end
+  if config.combatOnly and not force then
     if not IsUnitInCombat("player") then
       -- skip if player is not in combat
       d("?:!combat, skip")
       return
     end
+  end
+  local channel = ""
+  if config.groupOnly or config.allChannels then
+    if messageType == CHAT_CHANNEL_PARTY then
+      -- notify if group channel used
+      d("?:party")
+      channel = "GROUP"
+    end
+  end
+  if config.guildOnly or config.allChannels then
+    if messageType == CHAT_CHANNEL_GUILD1
+        or messageType == CHAT_CHANNEL_GUILD2
+        or messageType == CHAT_CHANNEL_GUILD3
+        or messageType == CHAT_CHANNEL_GUILD4
+        or messageType == CHAT_CHANNEL_GUILD5 then
+      -- notify if group channel used
+      d("?:guild")
+      channel = "GUILD"
+    end
+  end
+  if config.yellOnly or config.allChannels then
+    if messageType == CHAT_CHANNEL_YELL then
+      -- notify if yell channel used
+      d("?:yell")
+      channel = "YELL"
+    end
+  end
+  if alertChannel == "" and config.allChannels then
+    -- all other channels end up here
+    channel = "OTHER"
+  else
+    -- sorry, wrong channel
+    return
   end
   local timeDiff = GetDiffBetweenTimeStamps(GetTimeStamp(), MastersVoice.lastCall)
   if timeDiff < config.silentTime then
