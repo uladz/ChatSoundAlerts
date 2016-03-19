@@ -1,4 +1,5 @@
-local LAM2 = LibStub:GetLibrary("LibAddonMenu-2.0")
+-- Simple Chat Bubbles - By Dio Revived by RibbedStoic  (v1.0.4) -
+-- http://www.esoui.com/downloads/author-1518.html
 
 -------------------------------------------------------------------------------
 --	Configuration and settings
@@ -7,6 +8,7 @@ local LAM2 = LibStub:GetLibrary("LibAddonMenu-2.0")
 -- Main addon class.
 local MastersVoice = {
   name = "MastersVoice",
+  title = "Master's Voice",
   codeVersion = 0.5,
 
   -- configuration version, changing this will reset all addon settings
@@ -26,6 +28,8 @@ local config = {}
 local Default = {
   -- turn off this addon
   muteAll = false,
+  -- show notification info on startup
+  startupMessage = true,
   -- number of seconds to wait before sounding again
   silentTime = 0,
   -- whether to ignore [silentTime] for crown
@@ -123,6 +127,15 @@ end
 function MastersVoice.SetMuteAll(newBool)
   config.muteAll = newBool
   MastersVoice.UpdateAllChannels()
+  if newBool then
+    CHAT_SYSTEM:AddMessage("Message notification are |cFF0000disabled|r")
+  else
+    CHAT_SYSTEM:AddMessage("Message notification are |c00FF00enabled|r")
+  end
+end
+
+function MastersVoice.SetStartupMessage(newBool)
+  config.startupMessage = newBool
 end
 
 function MastersVoice.SetSilentTime(newTime)
@@ -260,7 +273,7 @@ end
 
 local panelData = {
   type = "panel",
-  name = "Master's Voice",
+  name = MastersVoice.title,
   author = "Uladz, HomoPuerRobustus",
   version = MastersVoice.codeVersion,
   registerForRefresh = true,
@@ -547,6 +560,23 @@ local optionsData = {
     disabled = function() return config.muteAll end,
     reference = "MastersVoice_OTHERPREVIEW_BUTTON"
   },
+  [27] = {
+    type = "header",
+    name = "More Options",
+    width = "full",
+    reference = "MastersVoice_HEADER_3"
+  },
+  [28] = {
+    type = "checkbox",
+    name = "Show info on load",
+    tooltip = "Print a short information about enabled notifications on game startup.",
+    getFunc = function() return config.startupMessage end,
+    setFunc = function(newBool) MastersVoice.SetStartupMessage(newBool) end,
+    width = "full",
+    default = Default.startupMessage,
+    disabled = function() return config.muteAll end,
+    reference = "MastersVoice_SETSTARTUPMESSAGE_CHECKBOX"
+  },
 }
 
 -------------------------------------------------------------------------------
@@ -555,26 +585,25 @@ local optionsData = {
 
 function MastersVoice:Initialize()
   -- Register event handlers.
-  config = ZO_SavedVars:New("MastersVoiceVars",
-      MastersVoice.configVersion, 
+  config = ZO_SavedVars:New(self.name.."Vars",
+      self.configVersion, 
       nil, 
       Default)
-  EVENT_MANAGER:RegisterForEvent(MastersVoice.name,
+  EVENT_MANAGER:RegisterForEvent(self.name,
       EVENT_CHAT_MESSAGE_CHANNEL, 
-      MastersVoice.OnChatMessageChannel)
-  EVENT_MANAGER:UnregisterForEvent(MastersVoice.name, 
+      self.OnChatMessageChannel)
+  EVENT_MANAGER:UnregisterForEvent(self.name, 
       EVENT_ADD_ON_LOADED)
-  
+
   -- Register addon settings.
-  LAM2:RegisterOptionControls("MastersVoiceOptions", 
-      optionsData)
-  LAM2:RegisterAddonPanel("MastersVoiceOptions", 
-      panelData)
-  
+  local LAM2 = LibStub:GetLibrary("LibAddonMenu-2.0")
+  LAM2:RegisterOptionControls(self.name, optionsData)
+  LAM2:RegisterAddonPanel(self.name, panelData)
+
   -- Register chat "/" commands.
-  SLASH_COMMANDS["/mvdebug"] = function() MastersVoice.SetDebug(not MastersVoice.debug) end
-  SLASH_COMMANDS["/mvmute"] = function() MastersVoice.SetMuteAll(true) end
-  SLASH_COMMANDS["/mvunmute"] = function() MastersVoice.SetMuteAll(false) end
+  SLASH_COMMANDS["/mvdebug"] = function() self.SetDebug(not MastersVoice.debug) end
+  SLASH_COMMANDS["/mute"] = function() self.SetMuteAll(true) end
+  SLASH_COMMANDS["/unmute"] = function() self.SetMuteAll(false) end
 end
 
 function MastersVoice.OnAddOnLoaded(event, addonName)
@@ -583,8 +612,44 @@ function MastersVoice.OnAddOnLoaded(event, addonName)
   end
 end
 
+function MastersVoice.OnPlayerActivated(...)
+  -- Do it once!
+  EVENT_MANAGER:UnregisterForEvent(MastersVoice.name,
+    EVENT_PLAYER_ACTIVATED)
+    
+  -- Let user know that notification are enabled
+  if not config.startupMessage then
+    return
+  end
+  if not config.muteAll then
+    local channels = ""
+    if config.groupOnly then
+      channels = channels.."group, "
+    end
+    if config.guildOnly then
+      channels = channels.."guild, "
+    end
+    if config.yellOnly then
+      channels = channels.."yell, "
+    end
+    if config.crownAlways then
+      channels = channels.."crown, "
+    end
+    if config.allChannels then
+      channels = channels.."all, "
+    end
+    channels = string.sub(channels, 1, -3)
+    zo_callLater(function()         
+      CHAT_SYSTEM:AddMessage("Message notification are |c00FF00enabled|r")
+      CHAT_SYSTEM:AddMessage("for channels: "..channels)
+    end)
+  end
+end
+
 EVENT_MANAGER:RegisterForEvent(MastersVoice.name, EVENT_ADD_ON_LOADED,
   MastersVoice.OnAddOnLoaded)
+EVENT_MANAGER:RegisterForEvent(MastersVoice.name, EVENT_PLAYER_ACTIVATED,
+  MastersVoice.OnPlayerActivated)
 
 -------------------------------------------------------------------------------
 -- Chat events handling
