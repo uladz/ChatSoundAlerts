@@ -1,4 +1,4 @@
-## Title: |rMaster's Voice |c9988770.5|r
+## Title: Master's Voice |c9988770.5|r
 ## Version: 0.5
 ## Author: Uladz, HomoPuerRobustus
 ## Description: Plays a sound whenever the group leader or any other group member (optional) says something in chat so you don't miss important messages in the heat of battle.

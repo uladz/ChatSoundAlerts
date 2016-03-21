@@ -32,14 +32,14 @@ local Default = {
   startupMessage = true,
   -- number of seconds to wait before sounding again
   silentTime = 0,
-  -- whether to ignore [silentTime] for crown
+  -- whether to force notifications for crown, ignores all cond's
   crownAlways = true,
   -- whether to sound if anyone speaks through /w
   whisperAlways = true,
   -- whether to sound only when player is in combat
   combatOnly = false,
   -- whether to sound only when player is NOT in combat
-  idleOnly = true,
+  outOfCombatOnly = true,
   -- whether to sound if player himself speaks
   playerAlso = false,
   -- whether to sound only if anyone speaks through /g
@@ -48,6 +48,8 @@ local Default = {
   yellOnly = true,
   -- whether to sound only if anyone speaks through /g#
   guildOnly = true,
+  -- whether to sound only if anyone speaks through /s
+  sayOnly = false,
   -- whether to sound only if crown speaks through /g or /y
   crownOnly = false,
   -- whether to sound only if in an alliance war zone
@@ -58,6 +60,8 @@ local Default = {
   guildAlarmSound = "NEW_NOTIFICATION",
   -- yell message alarm sound in [AlarmSoundsList] table
   yellAlarmSound = "NEW_NOTIFICATION",
+  -- say message alarm sound in [AlarmSoundsList] table
+  sayAlarmSound = "NEW_NOTIFICATION",
   -- crown message alarm sound in [AlarmSoundsList] table
   crownAlarmSound = "NEW_NOTIFICATION",
   -- whisper message alarm sound in [AlarmSoundsList] table
@@ -117,7 +121,8 @@ function MastersVoice.UpdateAllChannels()
     not config.muteAll and
     not config.groupOnly and
     not config.guildOnly and
-    not config.yellOnly
+    not config.yellOnly and
+    not config.sayOnly
 end
 
 function MastersVoice.SetDebug(newBool)
@@ -153,12 +158,12 @@ end
 function MastersVoice.SetCombatOnly(newBool)
   config.combatOnly = newBool
   if newBool then
-    config.idleOnly = false
+    config.outOfCombatOnly = false
   end
 end
 
 function MastersVoice.SetIdleOnly(newBool)
-  config.idleOnly = newBool
+  config.outOfCombatOnly = newBool
   if newBool then
     config.combatOnly = false
   end
@@ -180,6 +185,11 @@ end
 
 function MastersVoice.SetYellOnly(newBool)
   config.yellOnly = newBool
+  MastersVoice.UpdateAllChannels()
+end
+
+function MastersVoice.SetSayOnly(newBool)
+  config.aayOnly = newBool
   MastersVoice.UpdateAllChannels()
 end
 
@@ -209,6 +219,13 @@ function MastersVoice.SetYellAlarmSound(newSoundName, play)
   config.yellAlarmSound = newSoundName
   if play == true then
     MastersVoice.PlayYellAlarm()
+  end
+end
+
+function MastersVoice.SetSayAlarmSound(newSoundName, play)
+  config.sayAlarmSound = newSoundName
+  if play == true then
+    MastersVoice.PlaySayAlarm()
   end
 end
 
@@ -252,6 +269,11 @@ function MastersVoice.PlayYellAlarm()
   PlaySound(config.yellAlarmSound)
 end
 
+function MastersVoice.PlaySayAlarm()
+  d("^say^")
+  PlaySound(config.sayAlarmSound)
+end
+
 function MastersVoice.PlayWhisperAlarm()
   d("^whisper^")
   PlaySound(config.whisperAlarmSound)
@@ -282,7 +304,7 @@ local panelData = {
 }
 
 local optionsData = {
-  [1] = {
+  {
     type = "checkbox",
     name = "Mute All Notifications",
     tooltip = "Turn off all notifications.",
@@ -290,15 +312,13 @@ local optionsData = {
     setFunc = function(newBool) MastersVoice.SetMuteAll(newBool) end,
     width = "full",
     default = Default.muteAll,
-    reference = "MastersVoice_SETMUTEALL_CHECKBOX"
   },
-  [2] = {
+  {
     type = "header",
-    name = "Notification Conditions",
+    name = "Notification Channels",
     width = "full",
-    reference = "MastersVoice_HEADER_1"
   },
-  [3] = {
+  {
     type = "checkbox",
     name = "Group Channel",
     tooltip = "Notify only when anyone speaks through group chat.",
@@ -307,20 +327,8 @@ local optionsData = {
     width = "full",
     default = Default.groupOnly,
     disabled = function() return config.muteAll end,
-    reference = "MastersVoice_SETGROUPONLY_CHECKBOX"
   },
-  [4] = {
-    type = "checkbox",
-    name = "Yell Channel",
-    tooltip = "Notify only when anyone speaks through yells.",
-    getFunc = function() return config.yellOnly end,
-    setFunc = function(newBool) MastersVoice.SetYellOnly(newBool) end,
-    width = "full",
-    default = Default.yellOnly,
-    disabled = function() return config.muteAll end,
-    reference = "MastersVoice_SETYELLONLY_CHECKBOX"
-  },
-  [5] = {
+  {
     type = "checkbox",
     name = "Guild Channel",
     tooltip = "Notify only when anyone speaks through guild chat.",
@@ -329,9 +337,33 @@ local optionsData = {
     width = "full",
     default = Default.guildOnly,
     disabled = function() return config.muteAll end,
-    reference = "MastersVoice_SETGUILDONLY_CHECKBOX"
   },
-  [6] = {
+  {
+    type = "checkbox",
+    name = "Yell Channel",
+    tooltip = "Notify only when anyone speaks through yells.",
+    getFunc = function() return config.yellOnly end,
+    setFunc = function(newBool) MastersVoice.SetYellOnly(newBool) end,
+    width = "full",
+    default = Default.yellOnly,
+    disabled = function() return config.muteAll end,
+  },
+  {
+    type = "checkbox",
+    name = "Say Channel",
+    tooltip = "Notify only when anyone speaks through \"say\" chat.",
+    getFunc = function() return config.sayOnly end,
+    setFunc = function(newBool) MastersVoice.SetSayOnly(newBool) end,
+    width = "full",
+    default = Default.sayOnly,
+    disabled = function() return config.muteAll end,
+  },
+  {
+    type = "header",
+    name = "Notification Conditions",
+    width = "full",
+  },
+  {
     type = "checkbox",
     name = "Crown (leader) Only",
     tooltip = "Notify only when crown speaks through group chat or yells.",
@@ -340,9 +372,8 @@ local optionsData = {
     width = "full",
     default = Default.crownOnly,
     disabled = function() return config.muteAll end,
-    reference = "MastersVoice_SETCROWNONLY_CHECKBOX"
   },
-  [7] = {
+  {
     type = "checkbox",
     name = "In-Combat Only",
     tooltip = "Notify only when player is in combat.",
@@ -351,20 +382,18 @@ local optionsData = {
     width = "full",
     default = Default.combatOnly,
     disabled = function() return config.muteAll end,
-    reference = "MastersVoice_SETCOMBATONLY_CHECKBOX"
   },
-  [8] = {
+  {
     type = "checkbox",
     name = "Out-of-Combat Only",
     tooltip = "Notify only when player is |cFF0000NOT|r in combat.",
-    getFunc = function() return config.idleOnly end,
+    getFunc = function() return config.outOfCombatOnly end,
     setFunc = function(newBool) MastersVoice.SetIdleOnly(newBool) end,
     width = "full",
-    default = Default.idleOnly,
+    default = Default.outOfCombatOnly,
     disabled = function() return config.muteAll end,
-    reference = "MastersVoice_SETIDLEONLY_CHECKBOX"
   },
-  [9] = {
+  {
     type = "checkbox",
     name = "Alliance War Only",
     tooltip = "Notify only when player is in an Alliance War zone (e.g., Cyrodiil)",
@@ -373,9 +402,8 @@ local optionsData = {
     width = "full",
     default = Default.allianceWarOnly,
     disabled = function() return config.muteAll end,
-    reference = "MastersVoice_SETALLIANCEWARONLY_CHECKBOX"
   },
-  [10] = {
+  {
     type = "checkbox",
     name = "Force Crown (leader) Always",
     tooltip = "Always play notification for crown messages regardless of frequency or channel settings.",
@@ -384,9 +412,8 @@ local optionsData = {
     width = "full",
     default = Default.crownAlways,
     disabled = function() return config.muteAll end,
-    reference = "MastersVoice_SETCROWNALWAYS_CHECKBOX"
   },
-  [11] = {
+  {
     type = "checkbox",
     name = "Whisper Alarm",
     tooltip = "Play notification whenever someone sends me a whisper.",
@@ -395,22 +422,20 @@ local optionsData = {
     width = "full",
     default = Default.whisperAlways,
     disabled = function() return config.muteAll end,
-    reference = "MastersVoice_SETWHISPERALWAYS_CHECKBOX"
   },
-  [12] = {
+  {
     type = "checkbox",
     name = "Player Also",
-    tooltip = "Notify also when player speaks through group chat.",
+    tooltip = "Notify also when player speaks through enabled channels.",
     getFunc = function() return config.playerAlso end,
     setFunc = function(newBool) MastersVoice.SetPlayerAlso(newBool) end,
     width = "full",
     default = Default.playerOnly,
     disabled = function() return config.muteAll end,
-    reference = "MastersVoice_SETPLAYERALSO_CHECKBOX"
   },
-  [13] = {
+  {
     type = "slider",
-    name = "Frequency",
+    name = "Notification Frequency",
     tooltip = "Number of seconds to wait between notifications.",
     min = 0,
     max = 60,
@@ -420,15 +445,13 @@ local optionsData = {
     width = "full",
     default = Default.silentTime,
     disabled = function() return config.muteAll end,
-    reference = "MastersVoice_SILENTTIME_SLIDER"
   },
-  [14] = {
+  {
     type = "header",
     name = "Notification Sounds",
     width = "full",
-    reference = "MastersVoice_HEADER_2"
   },
-  [15] = {
+  {
     type = "dropdown",
     name = "Group Notification Sound",
     tooltip = "Choose which sound to play for group notifications.",
@@ -439,18 +462,16 @@ local optionsData = {
     width = "half",
     default = Default.groupAlarmSound,
     disabled = function() return config.muteAll end,
-    reference = "MastersVoice_GROUPALARMSOUND_DROPDOWN"
   },
-  [16] = {
+  {
     type = "button",
     name = "Preview Group",
     tooltip = "Preview notification sound.",
     func = function() MastersVoice.PlayGroupAlarm() end,
     width = "half",
     disabled = function() return config.muteAll end,
-    reference = "MastersVoice_GROUPPREVIEW_BUTTON"
   },
-  [17] = {
+  {
     type = "dropdown",
     name = "Crown Notification Sound",
     tooltip = "Choose which sound to play for crown notifications.",
@@ -461,18 +482,16 @@ local optionsData = {
     width = "half",
     default = Default.crownAlarmSound,
     disabled = function() return config.muteAll end,
-    reference = "MastersVoice_CROWNALARMSOUND_DROPDOWN"
   },
-  [18] = {
+  {
     type = "button",
     name = "Preview Crown",
     tooltip = "Preview notification sound.",
     func = function() MastersVoice.PlayCrownAlarm() end,
     width = "half",
     disabled = function() return config.muteAll end,
-    reference = "MastersVoice_CROWNPREVIEW_BUTTON"
   },
-  [19] = {
+  {
     type = "dropdown",
     name = "Guild Notification Sound",
     tooltip = "Choose which sound to play for guild notifications.",
@@ -483,18 +502,16 @@ local optionsData = {
     width = "half",
     default = Default.guildAlarmSound,
     disabled = function() return config.muteAll end,
-    reference = "MastersVoice_GUILDNALARMSOUND_DROPDOWN"
   },
-  [20] = {
+  {
     type = "button",
     name = "Preview Guild",
     tooltip = "Preview notification sound.",
     func = function() MastersVoice.PlayGuildAlarm() end,
     width = "half",
     disabled = function() return config.muteAll end,
-    reference = "MastersVoice_GUILDPREVIEW_BUTTON"
   },
-  [21] = {
+  {
     type = "dropdown",
     name = "Yell Notification Sound",
     tooltip = "Choose which sound to play for yell notifications.",
@@ -505,18 +522,36 @@ local optionsData = {
     width = "half",
     default = Default.yellAlarmSound,
     disabled = function() return config.muteAll end,
-    reference = "MastersVoice_YELLNALARMSOUND_DROPDOWN"
   },
-  [22] = {
+  {
     type = "button",
     name = "Preview Yell",
     tooltip = "Preview notification sound.",
     func = function() MastersVoice.PlayYellAlarm() end,
     width = "half",
     disabled = function() return config.muteAll end,
-    reference = "MastersVoice_YELLPREVIEW_BUTTON"
   },
-  [23] = {
+  {
+    type = "dropdown",
+    name = "Say Notification Sound",
+    tooltip = "Choose which sound to play for say notifications.",
+    choices = AlarmSoundsList,
+    sort = "name-up",
+    getFunc = function() return config.sayAlarmSound end,
+    setFunc = function(newSoundName) MastersVoice.SetSayAlarmSound(newSoundName, true) end,
+    width = "half",
+    default = Default.sayAlarmSound,
+    disabled = function() return config.muteAll end,
+  },
+  {
+    type = "button",
+    name = "Preview Yell",
+    tooltip = "Preview notification sound.",
+    func = function() MastersVoice.PlayYellAlarm() end,
+    width = "half",
+    disabled = function() return config.muteAll end,
+  },
+  {
     type = "dropdown",
     name = "Whisper Notifications Sound",
     tooltip = "Choose which sound to play for whisper notifications.",
@@ -527,18 +562,16 @@ local optionsData = {
     width = "half",
     default = Default.whisperAlarmSound,
     disabled = function() return config.muteAll end,
-    reference = "MastersVoice_WHISPERNALARMSOUND_DROPDOWN"
   },
-  [24] = {
+  {
     type = "button",
-    name = "Preview Other",
+    name = "Preview Whisper",
     tooltip = "Preview notification sound.",
     func = function() MastersVoice.PlayWhisperAlarm() end,
     width = "half",
     disabled = function() return config.muteAll end,
-    reference = "MastersVoice_WHISPERPREVIEW_BUTTON"
   },
-  [25] = {
+  {
     type = "dropdown",
     name = "Other Notifications Sound",
     tooltip = "Choose which sound to play for all other notifications.",
@@ -549,24 +582,21 @@ local optionsData = {
     width = "half",
     default = Default.otherAlarmSound,
     disabled = function() return config.muteAll end,
-    reference = "MastersVoice_OTHERNALARMSOUND_DROPDOWN"
   },
-  [26] = {
+  {
     type = "button",
     name = "Preview Other",
     tooltip = "Preview notification sound.",
     func = function() MastersVoice.PlayOtherAlarm() end,
     width = "half",
     disabled = function() return config.muteAll end,
-    reference = "MastersVoice_OTHERPREVIEW_BUTTON"
   },
-  [27] = {
+  {
     type = "header",
     name = "More Options",
     width = "full",
-    reference = "MastersVoice_HEADER_3"
   },
-  [28] = {
+  {
     type = "checkbox",
     name = "Show info on load",
     tooltip = "Print a short information about enabled notifications on game startup.",
@@ -575,7 +605,6 @@ local optionsData = {
     width = "full",
     default = Default.startupMessage,
     disabled = function() return config.muteAll end,
-    reference = "MastersVoice_SETSTARTUPMESSAGE_CHECKBOX"
   },
 }
 
@@ -632,16 +661,38 @@ function MastersVoice.OnPlayerActivated(...)
     if config.yellOnly then
       channels = channels.."yell, "
     end
+    if config.sayOnly then
+      channels = channels.."say, "
+    end
     if config.crownAlways then
       channels = channels.."crown, "
+    end
+    if config.whisperAlways then
+      channels = channels.."whisper, "
+    end
+    if config.playerAlso then
+      channels = channels.."player, "
     end
     if config.allChannels then
       channels = channels.."all, "
     end
-    channels = string.sub(channels, 1, -3)
-    zo_callLater(function()         
+    local conditions = ""
+    if config.crownOnly then
+      conditions = conditions.."crown, "
+    end
+    if config.combatOnly then
+      conditions = conditions.."combat, "
+    end
+    if config.outOfCombatOnly then
+      conditions = conditions.."out-of-combat, "
+    end
+    if config.allianceWarOnly then
+      conditions = conditions.."war, "
+    end
+    zo_callLater(function()
       CHAT_SYSTEM:AddMessage("Message notification are |c00FF00enabled|r")
-      CHAT_SYSTEM:AddMessage("for channels: "..channels)
+      CHAT_SYSTEM:AddMessage("- channels: "..channels:sub(1, -3))
+      CHAT_SYSTEM:AddMessage("- conditions: "..conditions:sub(1, -3))
     end)
   end
 end
@@ -686,7 +737,6 @@ function MastersVoice.OnChatMessageChannel(
   if fromName == GetRawUnitName(GetGroupLeaderUnitTag()) then
     crownSpeaks = true
     if config.crownAlways then
-      force = true
       -- if crown sound enforced then play right away
       MastersVoice.PlayCrownAlarm()
       return
@@ -713,7 +763,7 @@ function MastersVoice.OnChatMessageChannel(
       return
     end
   end
-  if config.idleOnly then
+  if config.outOfCombatOnly then
     if MastersVoice.CheckCombat() then
       -- skip if player is not in combat
       d("?:combat, skip")
@@ -746,6 +796,13 @@ function MastersVoice.OnChatMessageChannel(
       alertType = "YELL"
     end
   end
+  if config.sayOnly or config.allChannels then
+    if messageType == CHAT_CHANNEL_SAY then
+      -- notify if group channel used
+      d("?:say")
+      alertType = "SAY"
+    end
+  end
   if alertType == "" then
     -- all other channels end up here
     if config.allChannels then
@@ -774,6 +831,8 @@ function MastersVoice.OnChatMessageChannel(
       MastersVoice.PlayGuildAlarm()
     elseif alertType == "YELL" then
       MastersVoice.PlayYellAlarm()
+    elseif alertType == "SAY" then
+      MastersVoice.PlaySayAlarm()
     elseif alertType == "OTHER" then
       MastersVoice.PlayOtherAlarm()
     end
