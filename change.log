@@ -1,5 +1,16 @@
-Major relase 0.5:
-  * In progress...
+Major release 1.0:
+  * Complete rewrite of the code base! Simpler, easier to maintain, more flexible.
+  * Now you can choose from any combination of notification channels.
+  * You can choose alarm sounds per channel group.
+  * Supports account-wide or per-character settings.
+  * Can work together with Simple Chat Bubbles addon to sync channel settings.
+  * More sounds to select from and human readable sound names (not just IDs).
+  * Can print short summary of settings at startup (optional).
+  * You can choose in-combat or out-of-combat notification conditions.
+  * You can choose alliance war or out-of-war notification conditions.
+  * Whisper notifications can be enforced.
+  * Crown (party leader) notifications can be enforced.
+  * Lots of other fixes.
 
 Bugfix release 0.43 (by HomoPuerRobustus):
   * Fixed bug where custom frequency setting would produce error message and eliminate functionality.
