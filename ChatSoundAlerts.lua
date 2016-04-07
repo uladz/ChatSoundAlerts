@@ -22,7 +22,7 @@ local SOUND_OFFICER = 9
 local SOUND_ZONE = 10
 
 -- Main class.
-local MastersVoice = {
+local ChatAlerts = {
   name = "ChatSoundAlerts",
   title = "Chat Sound Alerts",
   author = "@uladz",
@@ -142,13 +142,13 @@ local MastersVoice = {
 
 -- Prints debug log message.
 local function _d(msg)
-  if MastersVoice.debug then
+  if ChatAlerts.debug then
     CHAT_SYSTEM:AddMessage("[MV_DEBUG] "..msg)
   end
 end
 
 -- Builds sorted list of all chat channels.
-function MastersVoice:GetChannels()
+function ChatAlerts:GetChannels()
   self.channels = {}
   self.sortedChannels = {}
 
@@ -191,7 +191,7 @@ function MastersVoice:GetChannels()
 end
 
 -- Builds sorted list of all chat channels.
-function MastersVoice:GetSounds()
+function ChatAlerts:GetSounds()
   self.sounds = {}
   self.sortedSounds = {}
 
@@ -213,7 +213,7 @@ function MastersVoice:GetSounds()
 end
 
 -- Builds a list of all alarm sound names and IDs.
-function MastersVoice:GetAlarms()
+function ChatAlerts:GetAlarms()
   self.alarmNameMap = {}
   self.alarmIdMap = {}
   self.alarmNames = {}
@@ -228,7 +228,7 @@ function MastersVoice:GetAlarms()
 end
 
 -- Synchronizes enabled channels settings with Simple Chat Bubbles.
-function MastersVoice:SyncWithSCB(val)
+function ChatAlerts:SyncWithSCB(val)
   if val ~= nil then
     self.db.syncWithSCB = val
   end
@@ -239,18 +239,7 @@ function MastersVoice:SyncWithSCB(val)
   end
 end
 
--- Returns true if a compatible version of SCB is loaded.
---[[
-function MastersVoice.CheckSCB()
-  if not GetSCB or not GetSCB().version then
-    return false
-  else
-    return GetSCB().version >= "2.2.1"
-  end
-end
-]]
-
-function MastersVoice:CheckSCB()
+function ChatAlerts:CheckSCB()
   if self.hasSCB ~= nil then
     return self.hasSCB
   end
@@ -292,7 +281,7 @@ function MastersVoice:CheckSCB()
 end
 
 -- Play a message notification.
-function MastersVoice:PlayAlarm(soundId)
+function ChatAlerts:PlayAlarm(soundId)
   local sound = self.db.sounds[soundId]
   if sound then
     _d("play "..self.soundNames[soundId].." = "..sound)
@@ -301,14 +290,14 @@ function MastersVoice:PlayAlarm(soundId)
 end
 
 -- Returns true if player is in "combat" mode.
-function MastersVoice.CheckCombat()
+function ChatAlerts.CheckCombat()
   return IsUnitInCombat("player") 
       or IsPlayerControllingSiegeWeapon() 
       or IsPlayerEscortingRam()
 end
 
 -- Mute/unmute with log message.
-function MastersVoice:Mute(val)
+function ChatAlerts:Mute(val)
   self.db.muteAll = val
   local state;
   if val then
@@ -320,7 +309,7 @@ function MastersVoice:Mute(val)
 end
 
 -- Enable/disable notifications in combat only.
-function MastersVoice:SetCombatOnly(val)
+function ChatAlerts:SetCombatOnly(val)
   self.db.combatOnly = val
   if val then
     self.db.outOfCombatOnly = false
@@ -328,7 +317,7 @@ function MastersVoice:SetCombatOnly(val)
 end
 
 -- Enable/disable notifications out of combat only.
-function MastersVoice:SetOutOfCombatOnly(val)
+function ChatAlerts:SetOutOfCombatOnly(val)
   self.db.outOfCombatOnly = val
   if val then
     self.db.combatOnly = false
@@ -336,7 +325,7 @@ function MastersVoice:SetOutOfCombatOnly(val)
 end
 
 -- Enable/disable notifications in AvA only.
-function MastersVoice:SetAllianceWarOnly(val)
+function ChatAlerts:SetAllianceWarOnly(val)
   self.db.allianceWarOnly = val
   if val then
     self.db.outOfWarOnly = false
@@ -344,7 +333,7 @@ function MastersVoice:SetAllianceWarOnly(val)
 end
 
 -- Enable/disable notifications out of AvA only.
-function MastersVoice:SetOutOfWarOnly(val)
+function ChatAlerts:SetOutOfWarOnly(val)
   self.db.outOfWarOnly = val
   if val then
     self.db.allianceWarOnly = false
@@ -355,7 +344,7 @@ end
 -- Settings Menu
 -------------------------------------------------------------------------------
 
-function MastersVoice:MakeConfig()
+function ChatAlerts:MakeConfig()
   -- Addon LAM2 config panel
   local panel = {
     type = "panel",
@@ -616,7 +605,7 @@ function MastersVoice:MakeConfig()
 end
 
 -- Switches between pre-character and account-wide settings.
-function MastersVoice:SetAccountWide(val)
+function ChatAlerts:SetAccountWide(val)
   self.db_CS.accountWide = val
   self.db_AW.accountWide = val
   if val then
@@ -627,7 +616,7 @@ function MastersVoice:SetAccountWide(val)
 end
 
 -- Initializes addon, loads all settings, registers for events, etc.
-function MastersVoice:Init()
+function ChatAlerts:Init()
   -- Default configuration.
   local defaults = {
     accountWide = false,
@@ -706,7 +695,7 @@ function MastersVoice:Init()
 end
 
 -- Print short summary of the addon option is chat.
-function MastersVoice:PrintStartupMessage(...)
+function ChatAlerts:PrintStartupMessage(...)
   if not self.db.startupMessage then
     return
   end
@@ -756,7 +745,7 @@ function MastersVoice:PrintStartupMessage(...)
 end
 
 -- Process a new message and sound a notification if conditions are met.
-function MastersVoice:NewMessage(messageType, fromName)
+function ChatAlerts:NewMessage(messageType, fromName)
   if self.db.muteAll then
       -- don't play notification if muted
       _d("all muted")
@@ -842,29 +831,29 @@ end
 -- Events handling
 -------------------------------------------------------------------------------
 
-function MastersVoice.OnAddOnLoaded(event, addonName)
-  if addonName == MastersVoice.name then
-    EVENT_MANAGER:UnregisterForEvent(MastersVoice.name, 
+function ChatAlerts.OnAddOnLoaded(event, addonName)
+  if addonName == ChatAlerts.name then
+    EVENT_MANAGER:UnregisterForEvent(ChatAlerts.name,
         EVENT_ADD_ON_LOADED)
-    MastersVoice:Init()
+    ChatAlerts:Init()
   end
 end
 
-function MastersVoice.OnPlayerActivated()
-  EVENT_MANAGER:UnregisterForEvent(MastersVoice.name, 
+function ChatAlerts.OnPlayerActivated()
+  EVENT_MANAGER:UnregisterForEvent(ChatAlerts.name,
       EVENT_PLAYER_ACTIVATED)
-  MastersVoice:PrintStartupMessage()
+  ChatAlerts:PrintStartupMessage()
 end
 
-function MastersVoice.OnChatMessageChannel(eventCode, messageType,
+function ChatAlerts.OnChatMessageChannel(eventCode, messageType,
     fromName, messageText, isCustomerService)
-  MastersVoice:NewMessage(messageType, fromName)
+  ChatAlerts:NewMessage(messageType, fromName)
 end
 
-EVENT_MANAGER:RegisterForEvent(MastersVoice.name, 
+EVENT_MANAGER:RegisterForEvent(ChatAlerts.name,
     EVENT_ADD_ON_LOADED,
-    MastersVoice.OnAddOnLoaded)
-EVENT_MANAGER:RegisterForEvent(MastersVoice.name, 
+    ChatAlerts.OnAddOnLoaded)
+EVENT_MANAGER:RegisterForEvent(ChatAlerts.name,
     EVENT_PLAYER_ACTIVATED,
-    MastersVoice.OnPlayerActivated)
+    ChatAlerts.OnPlayerActivated)
 
