@@ -250,8 +250,8 @@ function MastersVoice:CheckSCB()
     return self.hasSCB
   end
   _d("SCB?")
-  local libLA = LibStub:GetLibrary("LibLoadedAddons")
-  local loaded, version = libLA:IsAddonLoaded("SimpleChatBubbles")
+  local libAA = LibStub:GetLibrary("LibAddonAPI")
+  local loaded, version = libAA:IsAddonLoaded("SimpleChatBubbles")
   if loaded == nil then
     _d("addons are still loading")
     return nil
@@ -261,7 +261,7 @@ function MastersVoice:CheckSCB()
     self.hasSCB = false
   else
     if version == 2 then
-      self.scb = libLA:GetAddon("SimpleChatBubbles")
+      self.scb = libAA:GetAddonAPI("SimpleChatBubbles")
       if self.scb then
         if self.scb.version < "2.2.1" then
           _d("incompatible SCB addon version "..self.scb.version)
@@ -696,8 +696,8 @@ function MastersVoice:Init()
   SLASH_COMMANDS["/unmute"] = function() self:Mute(false) end
 
   -- Publish addon API.
-  local libLA = LibStub:GetLibrary("LibLoadedAddons")
-  libLA:RegisterAddon("MastersVoice", 1, self)
+  local libAA = LibStub:GetLibrary("LibAddonAPI")
+  libAA:RegisterAddon(self.name, 1, self)
 end
 
 -- Print short summary of the addon option is chat.
