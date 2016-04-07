@@ -1,7 +1,7 @@
 ## Title: Chat Sound Alerts |c9988771.0.0|r
 ## Version: 1.0.0
 ## Author: @uladz
-## Description: Plays a sound whenever the group leader or any other group member (optional) says something in chat so you don't miss important messages in the heat of battle.
+## Description: This addon will play a sound of your choice (from a list of pre-selected in-game sounds) for a variety of events and condition in the in-game chat. Different sounds can be selected for different events individually to make it easier to distinguish one from another.
 ## APIVersion: 100014
 ## SavedVariables: ChatSoundAlertsVars
 ## OptionalDependsOn: LibAddonMenu-2.0
@@ -28,5 +28,5 @@ Libs\LibAddonMenu-2.0\controls\iconpicker.lua
 ChatSoundAlerts.lua
 
 ; This Add-on is not created by, affiliated with or sponsored by ZeniMax Media Inc. or its affiliates.
-; The Elder Scrolls® and related logos are registered trademarks or trademarks of ZeniMax Media Inc. in the United States and/or other countries.
+; The Elder Scrollsï¿½ and related logos are registered trademarks or trademarks of ZeniMax Media Inc. in the United States and/or other countries.
 ; All rights reserved.

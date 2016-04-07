@@ -2,7 +2,7 @@
 
 ## What does this addon do.
 
-This addon will play a sound of your choice (from a list of pre-selected in-game sounds) for a variety of events and condition in the in-game chat. Different sounds can be selected for different events individually to make it easier to distingush one from another. 
+This addon will play a sound of your choice (from a list of pre-selected in-game sounds) for a variety of events and condition in the in-game chat. Different sounds can be selected for different events individually to make it easier to distinguish one from another.
 
 Current events on which you can receive an alert:
 * Any guild messages (including officer messages).
@@ -11,7 +11,7 @@ Current events on which you can receive an alert:
 * Group / party / leader messages.
 
 Conditions you can select:
-* In-conbat or out-of-combat.
+* In-combat or out-of-combat.
 * In AvA zone or out-of-AvA.
 * Force whisper or yell notification.
 * Force party leader notifications.
@@ -19,7 +19,7 @@ Conditions you can select:
 
 Other features:
 * Excludes yourself from notifications.
-* Can synchonize settings with "Simple Chat Bubbles" addon.
+* Can synchronize settings with "Simple Chat Bubbles" addon.
 
 For any sounds that are not available but you think are suitable/neede for chat message alerts - let me know which one you want to have to be added to the lists! For now I have just grabbed a list of sounds that I have found most suitable to my taste, it does not mean that there are no other good alert sounds in game :). 
 
@@ -29,7 +29,7 @@ You can find the settings in Addon Settings -> Chat Sound Alerts. In the Chat So
 
 ## Group leader chat notification.
 
-Unique feature that I have "spyed" for awesome "The Master's Voice" http://www.esoui.com/downloads/info1113-TheMastersVoice.html addon, all credits for this idea does to HomoPuerRobustus. The addon can play a dedicated sound alert whenever the group leader says something in chat so you don't miss important messages in the heat of battle. Extremely useful feature IMHO.
+Unique feature that I have "spyed" for awesome [The Master's Voice](http://www.esoui.com/downloads/info1113-TheMastersVoice.html) addon, all credits for this idea does to HomoPuerRobustus. The addon can play a dedicated sound alert whenever the group leader says something in chat so you don't miss important messages in the heat of battle. Extremely useful feature IMHO.
  
 What's up next?
 * Add "conversation notification" feature.

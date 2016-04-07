@@ -1,10 +1,15 @@
 -- Chat Sound Alerts by @uladz
--- http://www.esoui.com/downloads/info1113-TheMastersVoice.html
+--
+-- This addon will play a sound of your choice (from a list of pre-selected
+-- in-game sounds) for a variety of events and condition in the in-game chat.
+-- Different sounds can be selected for different events individually to make
+-- it easier to distinguish one from another.
 
 -------------------------------------------------------------------------------
 --	Configuration and settings
 -------------------------------------------------------------------------------
 
+-- Sound typy groups.
 local SOUND_OTHER = 1
 local SOUND_CROWN = 2
 local SOUND_PARTY = 3
