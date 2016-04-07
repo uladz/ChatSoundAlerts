@@ -1,4 +1,4 @@
--- The Master's Voice - By HomoPuerRobustus, Revived by Uladz
+-- Chat Sound Alerts by @uladz
 -- http://www.esoui.com/downloads/info1113-TheMastersVoice.html
 
 -------------------------------------------------------------------------------
@@ -18,9 +18,9 @@ local SOUND_ZONE = 10
 
 -- Main class.
 local MastersVoice = {
-  name = "MastersVoice",
-  title = "Master's Voice",
-  author = "Uladz, HomoPuerRobustus",
+  name = "ChatSoundAlerts",
+  title = "Chat Sound Alerts",
+  author = "@uladz",
   version = "1.0.0",
   dbVersion = 1,
 
@@ -247,7 +247,7 @@ end
 
 function MastersVoice:CheckSCB()
   if self.hasSCB ~= nil then
---    return self.hasSCB
+    return self.hasSCB
   end
   _d("SCB?")
   local libLA = LibStub:GetLibrary("LibLoadedAddons")
@@ -305,10 +305,11 @@ end
 -- Mute/unmute with log message.
 function MastersVoice:Mute(val)
   self.db.muteAll = val
+  local state;
   if val then
-    local state = "|cFF0000disabled|r"
+    state = "|cFF0000disabled|r"
   else
-    local state = "|c00FF00enabled|r"
+    state = "|c00FF00enabled|r"
   end
   CHAT_SYSTEM:AddMessage("Message notification are "..state)
 end
@@ -691,8 +692,8 @@ function MastersVoice:Init()
 
   -- Register chat "/" commands.
   SLASH_COMMANDS["/mvdebug"] = function() self.debug = not self.debug end
-  SLASH_COMMANDS["/mute"] = function() self.Mute(true) end
-  SLASH_COMMANDS["/unmute"] = function() self.Mute(false) end
+  SLASH_COMMANDS["/mute"] = function() self:Mute(true) end
+  SLASH_COMMANDS["/unmute"] = function() self:Mute(false) end
 
   -- Publish addon API.
   local libLA = LibStub:GetLibrary("LibLoadedAddons")
@@ -744,7 +745,7 @@ function MastersVoice:PrintStartupMessage(...)
     end)
   else
     zo_callLater(function()
-      CHAT_SYSTEM:AddMessage("Message notification are |cFF0000muted|r")
+      CHAT_SYSTEM:AddMessage("Message notification are |cFF0000disabled|r")
     end)
   end
 end

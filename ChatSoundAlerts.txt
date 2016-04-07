@@ -1,9 +1,9 @@
-## Title: Master's Voice |c9988770.5|r
-## Version: 0.5
-## Author: Uladz, HomoPuerRobustus
+## Title: Chat Sound Alerts |c9988771.0.0|r
+## Version: 1.0.0
+## Author: @uladz
 ## Description: Plays a sound whenever the group leader or any other group member (optional) says something in chat so you don't miss important messages in the heat of battle.
 ## APIVersion: 100014
-## SavedVariables: MastersVoiceVars
+## SavedVariables: ChatSoundAlertsVars
 ## OptionalDependsOn: LibAddonMenu-2.0
 
 # Libraries
@@ -25,4 +25,8 @@ Libs\LibAddonMenu-2.0\controls\texture.lua
 Libs\LibAddonMenu-2.0\controls\iconpicker.lua
 
 # Main file
-MastersVoice.lua
+ChatSoundAlerts.lua
+
+; This Add-on is not created by, affiliated with or sponsored by ZeniMax Media Inc. or its affiliates.
+; The Elder Scrolls® and related logos are registered trademarks or trademarks of ZeniMax Media Inc. in the United States and/or other countries.
+; All rights reserved.
