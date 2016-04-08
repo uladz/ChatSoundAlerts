@@ -27,6 +27,12 @@ For any sounds that are not available but you think are suitable/neede for chat 
 
 You can find the settings in Addon Settings -> Chat Sound Alerts. In the Chat Sound Alerts section you will find everything you need precisely configure and fine tune the addon to your individual needs. It is pretty straight forward and the tooltips on mouse overs has even more detailed information.
 
+## Chat commands.
+
+The following commands are supported in chat window:
+* **/mute** - mutes all sound notifications.
+* **/unmute** - un-mutes previously muted notifications.
+
 ## Group leader chat notification.
 
 Unique feature that I have "spyed" for awesome [The Master's Voice](http://www.esoui.com/downloads/info1113-TheMastersVoice.html) addon, all credits for this idea does to HomoPuerRobustus. The addon can play a dedicated sound alert whenever the group leader says something in chat so you don't miss important messages in the heat of battle. Extremely useful feature IMHO.

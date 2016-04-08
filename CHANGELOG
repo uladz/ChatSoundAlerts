@@ -1,5 +1,5 @@
 1.0.0:
-  * Now you can choose from any combination of chat channels.
+  * You can choose from any combination of chat channels.
   * You can choose alarm sounds per channel group.
   * Supports account-wide or per-character settings.
   * Can work together with SimpleChatBubbles addon to sync channel settings.
@@ -10,4 +10,5 @@
   * Whisper notifications can be enforced.
   * Crown (party leader) notifications can be enforced.
   * Frequency of notification can be adjusted.
+  * Notifications from player can be muted or enabled.
   * Introduces new LibAddonAPI library (to be release separately soon).
