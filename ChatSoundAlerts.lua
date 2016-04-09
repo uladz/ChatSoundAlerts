@@ -257,7 +257,7 @@ function ChatAlerts:CheckSCB()
     if version == 2 then
       self.scb = libAA:GetAddonAPI("SimpleChatBubbles")
       if self.scb then
-        if self.scb.version < "2.2.1" then
+        if self.scb.version < "2.2.0" then
           _d("incompatible SCB addon version "..self.scb.version)
           self.scb = nil
           self.hasSCB = false
