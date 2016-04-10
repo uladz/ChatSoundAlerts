@@ -1,5 +1,5 @@
-## Title: Chat Sound Alerts |c9988771.0.0|r
-## Version: 1.0.0
+## Title: Chat Sound Alerts |c9988771.0.1|r
+## Version: 1.0.1
 ## Author: @uladz
 ## Description: This addon will play a sound of your choice (from a list of pre-selected in-game sounds) for a variety of events and condition in the in-game chat. Different sounds can be selected for different events individually to make it easier to distinguish one from another.
 ## APIVersion: 100014

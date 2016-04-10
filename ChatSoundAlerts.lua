@@ -26,7 +26,7 @@ local ChatAlerts = {
   name = "ChatSoundAlerts",
   title = "Chat Sound Alerts",
   author = "@uladz",
-  version = "1.0.0",
+  version = "1.0.1",
   dbVersion = 1,
 
   -- List of all supported channels.
