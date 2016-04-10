@@ -37,7 +37,8 @@ The following commands are supported in chat window:
 
 Unique feature that I have "spyed" for awesome [The Master's Voice](http://www.esoui.com/downloads/info1113-TheMastersVoice.html) addon, all credits for this idea does to HomoPuerRobustus. The addon can play a dedicated sound alert whenever the group leader says something in chat so you don't miss important messages in the heat of battle. Extremely useful feature IMHO.
  
-What's up next?
+## What's up next?
+
 * Add "conversation notification" feature.
 * Allow to specify a blacklist of players you don't want it to make a notification for.
 * Add feature "alert trigger on custom words/phrases if said in chat".
